@@ -21,7 +21,7 @@ export const register = async (req, res) => {
       {
         _id: user._id,
       },
-      'secretKeylalala',
+      process.env.JWT_SEKRET_KEY,
       {
         expiresIn: '30d', //срок хранения
       },
@@ -56,7 +56,7 @@ export const login = async (req, res) => {
       {
         _id: user._id,
       },
-      'secretKeylalala',
+      process.env.JWT_SEKRET_KEY,
       {
         expiresIn: '30d', //срок хранения
       },

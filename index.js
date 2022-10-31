@@ -25,10 +25,10 @@ import {
 dotenv.config();
 
 mongoose
-  .connect(`mongodb+srv://${process.env.CONNECT_DB}`)
+  .connect(process.env.CONNECT_DB)
   .then(() => console.log('DB ok'))
   .catch((err) => console.log('Error', err));
-console.log('------->>>' + process.env.CONNECT_DB);
+
 const app = express();
 
 const storage = multer.diskStorage({
