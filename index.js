@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import multer from 'multer';
 import cors from 'cors'; //відключає блокування зі сторонніх доменів
+import * as dotenv from 'dotenv';
 
 import { chekAuth, handlValidationErr } from './utils/index.js';
 import {
@@ -21,13 +22,13 @@ import {
   ImageController,
 } from './controllers/index.js';
 
+dotenv.config();
+
 mongoose
-  .connect(
-    'mongodb+srv://vovavova:vova2pzvova@cluster0.hqu4hqc.mongodb.net/polyn?retryWrites=true&w=majority',
-  )
+  .connect(`mongodb+srv://${process.env.CONNECT_DB}`)
   .then(() => console.log('DB ok'))
   .catch((err) => console.log('Error', err));
-
+console.log('------->>>' + process.env.CONNECT_DB);
 const app = express();
 
 const storage = multer.diskStorage({
