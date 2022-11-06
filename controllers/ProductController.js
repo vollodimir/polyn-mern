@@ -2,11 +2,33 @@ import ProductModel from '../models/Product.js';
 
 export const getAll = async (req, res) => {
   try {
-    const { page = 1, limit = 6, search = '' } = req.query;
+    const { page = 1, limit = 6, search = '', colors, tags, sizes } = req.query;
+
+    const allColors = await ProductModel.collection.distinct('colors');
+    const allTags = await ProductModel.collection.distinct('tags');
+    const allSizes = await ProductModel.collection.distinct('sizes');
+
+    const filter =
+      colors || tags || sizes
+        ? {
+            $or: [
+              { colors: { $in: colors?.split(',') } },
+              { tags: { $in: tags?.split(',') } },
+              { sizes: { $in: sizes?.split(',') } },
+            ],
+          }
+        : {};
+
     const searchRequest = {
-      $or: [{ title: { $regex: search, $options: 'i' } }],
+      $and: [{ title: { $regex: search, $options: 'i' } }, filter],
     };
     const allProducts = await ProductModel.find(searchRequest).count();
+
+    const parameters = {
+      allColors,
+      allTags,
+      allSizes,
+    };
     const pagination = {
       page,
       limit,
@@ -23,6 +45,7 @@ export const getAll = async (req, res) => {
     res.json({
       pagination,
       products,
+      parameters,
     });
   } catch (err) {
     console.log(err);
