@@ -2,11 +2,18 @@ import ProductModel from '../models/Product.js';
 
 export const getAll = async (req, res) => {
   try {
-    const { page = 1, limit = 6, search = '', colors, tags, sizes } = req.query;
+    const { page = 1, limit = 6, search = '', colors, tags, sizes, minPrice, maxPrice } = req.query;
 
     const allColors = await ProductModel.collection.distinct('colors');
     const allTags = await ProductModel.collection.distinct('tags');
     const allSizes = await ProductModel.collection.distinct('sizes');
+    const minPriceProduct = await ProductModel.find().sort({ price: 1 });
+
+    console.log(minPrice, maxPrice);
+    const filterPrice =
+      minPrice || maxPrice
+        ? { $and: [{ price: { $gte: minPrice || 79 } }, { price: { $lte: maxPrice || 600 } }] }
+        : {};
 
     const filter =
       colors || tags || sizes
@@ -20,7 +27,7 @@ export const getAll = async (req, res) => {
         : {};
 
     const searchRequest = {
-      $and: [{ title: { $regex: search, $options: 'i' } }, filter],
+      $and: [{ title: { $regex: search, $options: 'i' } }, filter, filterPrice],
     };
     const allProducts = await ProductModel.find(searchRequest).count();
 
@@ -28,6 +35,11 @@ export const getAll = async (req, res) => {
       allColors,
       allTags,
       allSizes,
+      firstPrice: minPriceProduct[0]?.price - minPriceProduct[0]?.price * minPriceProduct[0]?.sale,
+      lastPrice:
+        minPriceProduct[minPriceProduct.length - 1]?.price -
+        minPriceProduct[minPriceProduct.length - 1]?.price *
+          minPriceProduct[minPriceProduct.length - 1]?.sale,
     };
     const pagination = {
       page,
