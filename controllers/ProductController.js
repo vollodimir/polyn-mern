@@ -2,14 +2,23 @@ import ProductModel from '../models/Product.js';
 
 export const getAll = async (req, res) => {
   try {
-    const { page = 1, limit = 6, search = '', colors, tags, sizes, minPrice, maxPrice } = req.query;
+    const {
+      page = 1,
+      limit = 6,
+      search = '',
+      colors,
+      tags,
+      sizes,
+      minPrice,
+      maxPrice,
+      sortBy,
+    } = req.query;
 
     const allColors = await ProductModel.collection.distinct('colors');
     const allTags = await ProductModel.collection.distinct('tags');
     const allSizes = await ProductModel.collection.distinct('sizes');
     const minPriceProduct = await ProductModel.find().sort({ price: 1 });
 
-    console.log(minPrice, maxPrice);
     const filterPrice =
       minPrice || maxPrice
         ? { $and: [{ price: { $gte: minPrice || 79 } }, { price: { $lte: maxPrice || 600 } }] }
@@ -29,6 +38,14 @@ export const getAll = async (req, res) => {
     const searchRequest = {
       $and: [{ title: { $regex: search, $options: 'i' } }, filter, filterPrice],
     };
+
+    const sort =
+      (sortBy === 'priceUp' && { price: 1 }) ||
+      (sortBy === 'priceDown' && { price: -1 }) ||
+      (sortBy === 'byName' && { title: 1 });
+
+    console.log(sort);
+
     const allProducts = await ProductModel.find(searchRequest).count();
 
     const parameters = {
@@ -48,6 +65,7 @@ export const getAll = async (req, res) => {
       allProducts,
     };
     const products = await ProductModel.find(searchRequest)
+      .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .populate('category')
