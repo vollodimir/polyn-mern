@@ -44,8 +44,6 @@ export const getAll = async (req, res) => {
       (sortBy === 'priceDown' && { price: -1 }) ||
       (sortBy === 'byName' && { title: 1 });
 
-    console.log(sort);
-
     const allProducts = await ProductModel.find(searchRequest).count();
 
     const parameters = {
